@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+    <title>Labirintian</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/jquery.tmpl.min.js"></script>
+    <script src="js/Game.js"></script>
+
+    <script>
+        $(document).ready(function($) {
+            $('[data-game]').Game({});
+        });
+    </script>
+</head>
+<body>
+<div class="wrapper" data-game>
+    <div class="menu menu-shown">
+        <div class="container">
+            <div class="header">Main menu</div>
+            <div class="menu-item" data-action="start">Start</div>
+            <div class="menu-item" data-action="options">Options</div>
+        </div>
+    </div>
+    <div class="screen">
+        <canvas></canvas>
+    </div>
+</div>
+</body>
+</html>
+
+<script id="options" type="text/x-tmpl">
+    <div class="options">
+        <div class="header"></div>
+        <ul class="row">
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</script>
