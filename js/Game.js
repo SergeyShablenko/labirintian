@@ -7,6 +7,7 @@
         this.ctx = this.canvas.getContext('2d');
         this.options = $.extend({}, this.DEFAULT_OPTIONS, options);
         this.timers = {};
+        this.level = null;
 
         this.init();
     };
@@ -17,13 +18,37 @@
 
     Game.prototype.init = function () {
         $(document).on('keypress', $.proxy(this.hotKeyBind, this));
-//        this.timers.game = setInterval($.proxy(this.test, this), 1000 / 30);
-//        this.test();
+        this.$elem.on('click', '[data-action]', $.proxy(this.action, this));
     };
 
-    Game.prototype.test = function () {
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    Game.prototype.ucfirst = function (str) {
+        var char = str.charAt(0).toUpperCase();
+        return char + str.substr(1, str.length - 1);
+    };
+
+    Game.prototype.lcfirst = function (str) {
+        var char = str.charAt(0).toLowerCase();
+        return char + str.substr(1, str.length - 1);
+    };
+
+    Game.prototype.strToCamel = function (str, divider) {
+        var result = '',
+            self = this;
+        $.each(str.split(divider), function () {
+            result += self.ucfirst(this);
+        });
+
+        return this.lcfirst(result);
+    };
+
+    Game.prototype.action = function (e, data) {
+        var $elem = $(e.currentTarget),
+            action = this.strToCamel($elem.data('action'), '-');
+
+        if (typeof this[action] !== 'function') {
+            return;
+        }
+        return this[action](e);
     };
 
     Game.prototype.renderMenu = function () {
@@ -41,6 +66,11 @@
         switch(e.keyCode) {
             case 112: this.renderMenu(); break;
         }
+    };
+
+    Game.prototype.lvlGenerate = function () {
+        this.level = new Level(this.ctx, {});
+        this.level.draw();
     };
 
     function Plugin(option) {

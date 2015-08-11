@@ -6,6 +6,7 @@
     <script src="js/jquery-2.1.4.min.js"></script>
     <script src="js/jquery.tmpl.min.js"></script>
     <script src="js/Game.js"></script>
+    <script src="js/Level.js"></script>
 
     <script>
         $(document).ready(function($) {
@@ -19,7 +20,8 @@
         <div class="container">
             <div class="header">Main menu</div>
             <div class="menu-item" data-action="start">Start</div>
-            <div class="menu-item" data-action="options">Options</div>
+            <div class="menu-item" data-action="options" data-template="options">Options</div>
+            <div class="menu-item" data-action="lvl-generate">Generate level</div>
         </div>
     </div>
     <div class="screen">
