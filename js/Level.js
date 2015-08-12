@@ -3,19 +3,26 @@ var Level = function (context, options) {
     this.options = $.extend({}, this.DEFAULT_OPTIONS, options);
     this.time = 0;
     this.map = [];
+    this.enters = [];
 
     this.generate();
 };
 
 Level.prototype.DEFAULT_OPTIONS = {
-    width: 50,
-    height: 50,
-    maxEntryPoints: 5
+    width: 70,
+    height: 70,
+    maxEntryPoints: 10,
+    minEntryPoints: 2
 };
 
-Level.prototype.DEFAULT_TYPES = {
-    way: 1,
-    enter: 3
+Level.prototype.ITEM_TYPES = {
+    passable: {
+        way: 1,
+        enter: 2
+    },
+    impassable: {
+        wall: 0
+    }
 };
 
 Level.prototype.draw = function() {
@@ -23,7 +30,7 @@ Level.prototype.draw = function() {
     var text = '';
     for(var i=0; i<this.options.width; i++) {
         for(var j=0; j<this.options.width; j++) {
-            text += this.map[i][j] + ' ';
+            text += this.map[i][j].type + ' ';
         }
         text += '<br>';
     }
@@ -35,59 +42,105 @@ Level.prototype.update = function (dt) {
 };
 
 Level.prototype.generate = function () {
-    var countEntryPoints = parseInt(Math.random() * this.options.maxEntryPoints + 2),
-        branches = [],
-        connectedEntries = [];
-
     this.emptyLevel();
+    this.generateEntryPoints();
+    this.generateMap();
+};
+
+Level.prototype.generateEntryPoints = function () {
+    var countEntryPoints = parseInt(Math.random() * (this.options.maxEntryPoints - this.options.minEntryPoints) + this.options.minEntryPoints);
+
     for(var i=0; i<countEntryPoints; i++) {
         var x = parseInt(Math.random() * this.options.width),
             y = parseInt(Math.random() * this.options.height);
-        branches.push({i: x, j: y, point: i});
-        this.map[x][y] = this.DEFAULT_TYPES.enter;
+        this.enters.push({
+            linked: false,
+            branch: [{
+                x: x,
+                y: y
+            }]
+        });
+        this.map[x][y] = {
+            type: this.ITEM_TYPES.passable.enter,
+            enter: i
+        };
     }
+};
 
-    for(var i=0; i<branches.length; i++) {
-        var x = branches[i].i,
-            y = branches[i].j;
+Level.prototype.generateMap = function () {
+    while(true) {
+        for(var i=0; i<this.enters.length; i++) {
+            for(var j=0; j< this.enters[i].branch.length; j++) {
+                var x = this.enters[i].branch[j].x,
+                    y = this.enters[i].branch[j].y;
 
-        if(typeof this.map[x+1] !== 'undefined') {
-            this.newBranch(x+1, y, branches, i);
-        }
-        if(typeof this.map[x][y+1] !== 'undefined') {
-            this.newBranch(x, y+1, branches, i);
-        }
-        if(typeof this.map[x+1] !== 'undefined') {
-            if(typeof this.map[x+1][y+1] !== 'undefined') {
-                this.newBranch(x + 1, y + 1, branches, i);
+                if(typeof this.map[x+1] !== 'undefined') {
+                    this.createBranch(x+1, y, i);
+                }
+                if(typeof this.map[x][y+1] !== 'undefined') {
+                    this.createBranch(x, y+1, i);
+                }
+                if(typeof this.map[x+1] !== 'undefined') {
+                    if(typeof this.map[x+1][y+1] !== 'undefined') {
+                        this.createBranch(x+1, y+1, i);
+                    }
+                }
+                if(typeof this.map[x-1] !== 'undefined') {
+                    this.createBranch(x-1, y, i);
+                }
+                if(typeof this.map[x][y-1] !== 'undefined') {
+                    this.createBranch(x, y-1, i);
+                }
+                if(typeof this.map[x-1] !== 'undefined') {
+                    if(typeof this.map[x-1][y-1] !== 'undefined') {
+                        this.createBranch(x-1, y-1, i);
+                    }
+                }
+
+                this.enters[i].branch.splice(j, 1);
             }
         }
-        if(typeof this.map[x-1] !== 'undefined') {
-            this.newBranch(x-1, y, branches, i);
-        }
-        if(typeof this.map[x][y-1] !== 'undefined') {
-            this.newBranch(x, y-1, branches, i);
-        }
-        if(typeof this.map[x-1] !== 'undefined') {
-            if(typeof this.map[x-1][y-1] !== 'undefined') {
-                this.newBranch(x - 1, y - 1, branches, i);
-            }
+
+        if(this.checkLink()) {
+            break;
         }
     }
 };
 
-Level.prototype.newBranch = function (i, j, branches, pos) {
-    if(this.inTypes(this.map[i][j], this.DEFAULT_TYPES) !== -1) {
-        branches.splice(pos, 1);
+Level.prototype.createBranch = function (x, y, enter) {
+    if(this.inAssoc(this.map[x][y].type, this.ITEM_TYPES.passable) !== -1) {
+        if(enter !== this.map[x][y].enter) {
+            this.enters[enter].linked = this.map[x][y].enter;
+        }
     } else {
-        var newBranch = parseInt(Math.random() * 2);
-        if(newBranch === 1) {
-            branches.push({i: i, j: j});
-            this.map[i][j] = this.DEFAULT_TYPES.way;
+        var newBranch = parseInt(Math.random() * 100 +1);
+        if((newBranch > 0 && newBranch < 35)
+            || (newBranch > 70 && newBranch < 100)
+            || (this.enters[enter].linked === false && this.enters[enter].branch.length < 2)) {
+            this.enters[enter].branch.push({x: x, y: y, enter: enter});
+            this.map[x][y] = {type: this.ITEM_TYPES.passable.way, enter: enter};
+        }
+    }
+};
+
+Level.prototype.checkLink = function () {
+    for(var i=0; i<this.enters.length; i++) {
+        if(this.enters[i].linked === false) {
+            return false;
         }
     }
 
-    return branches;
+    return true;
+};
+
+Level.prototype.inAssoc = function (value, array) {
+    for(var i in array) {
+        if(array[i] === value) {
+            return i;
+        }
+    }
+
+    return -1;
 };
 
 Level.prototype.emptyLevel = function () {
@@ -95,17 +148,7 @@ Level.prototype.emptyLevel = function () {
     for(var i=0; i<this.options.width; i++) {
         this.map.push([]);
         for(var j=0; j<this.options.height; j++) {
-            this.map[i].push(0);
+            this.map[i].push({type: 0, enter: -1});
         }
     }
-};
-
-Level.prototype.inTypes = function (value) {
-    for(var i in this.DEFAULT_TYPES) {
-        if(this.DEFAULT_TYPES[i] === value) {
-            return i;
-        }
-    }
-
-    return -1;
 };
