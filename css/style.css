@@ -1,4 +1,4 @@
-html, body, .container, .menu, .header{
+html, body, .container, .menu, .header, .container-fluid{
     margin: 0;
     padding: 0;
 }
@@ -25,12 +25,13 @@ html, body, .container, .menu, .header{
     height: 100%;
     transition: all ease-out 0.5s;
 }
-.container > div{
-    padding: 10px;
+.menu > .container > .container-fluid{
+    overflow: auto;
 }
 .menu-item{
     cursor: pointer;
     font-weight: bold;
+    padding: 10px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -48,6 +49,7 @@ html, body, .container, .menu, .header{
 .header{
     font-size: 20px;
     text-align: center;
+    padding: 10px;
     background-color: ghostwhite;
     border-bottom: 1px solid gray;
     -webkit-box-shadow: 1px 0 3px 0 black;

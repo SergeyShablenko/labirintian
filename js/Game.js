@@ -17,6 +17,7 @@
     };
 
     Game.prototype.init = function () {
+        $(document.body).css('overflow', 'hidden');
         $(document).on('keypress', $.proxy(this.hotKeyBind, this));
         this.$elem.on('click', '[data-action]', $.proxy(this.action, this));
     };
@@ -54,9 +55,13 @@
     Game.prototype.renderMenu = function () {
         var menu = this.$elem.find('.menu');
         if(menu.hasClass('menu-shown')) {
+            $(document.body).css('overflow', 'auto');
             menu.removeClass('menu-shown');
             menu.fadeOut('slow');
         } else {
+            $(document.body).css('overflow', 'hidden');
+            menu.css('left', 0);
+            menu.css('top', $(document.body).scrollTop());
             menu.addClass('menu-shown');
             menu.fadeIn('slow');
         }

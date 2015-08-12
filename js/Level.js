@@ -34,7 +34,7 @@ Level.prototype.draw = function() {
         }
         text += '<br>';
     }
-    $('.wrapper').append(text);
+    $('.screen').html(text);
 };
 
 Level.prototype.update = function (dt) {
