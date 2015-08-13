@@ -17,7 +17,9 @@
     };
 
     Game.prototype.init = function () {
-        $(document.body).css('overflow', 'hidden');
+        this.canvas.width = 1280;
+        this.canvas.height = 1024;
+        this.renderMenu();
         $(document).on('keypress', $.proxy(this.hotKeyBind, this));
         this.$elem.on('click', '[data-action]', $.proxy(this.action, this));
     };
@@ -70,12 +72,20 @@
     Game.prototype.hotKeyBind = function(e, data) {
         switch(e.keyCode) {
             case 112: this.renderMenu(); break;
+            case 97: this.level.translate(50, 0); break;
+            case 119: this.level.translate(0, 50); break;
+            case 100: this.level.translate(-50, 0); break;
+            case 115: this.level.translate(0, -50); break;
         }
     };
 
     Game.prototype.lvlGenerate = function () {
         this.level = new Level(this.ctx, {});
-        this.level.draw();
+    //    this.level.draw();
+        if(typeof this.timers.mainProc !== 'undefined') {
+            clearInterval(this.timers.mainProc);
+        }
+        this.timers.mainProc = setInterval($.proxy(this.level.draw, this.level), 1000 / this.options.fps);
     };
 
     function Plugin(option) {

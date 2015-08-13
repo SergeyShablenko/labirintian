@@ -4,15 +4,22 @@ var Level = function (context, options) {
     this.time = 0;
     this.map = [];
     this.enters = [];
+    this.offset = {x: 0, y: 0};
 
     this.generate();
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 };
 
 Level.prototype.DEFAULT_OPTIONS = {
-    width: 70,
-    height: 70,
+    screenWidth: 1680,
+    screenHeight: 1024,
+    mapWidth: 0,
+    mapHeight: 0,
+    width: 200,
+    height: 200,
     maxEntryPoints: 10,
-    minEntryPoints: 2
+    minEntryPoints: 2,
+    gridSize: 20
 };
 
 Level.prototype.ITEM_TYPES = {
@@ -27,29 +34,45 @@ Level.prototype.ITEM_TYPES = {
 
 Level.prototype.draw = function() {
     var ctx = this.ctx;
+    for(var i=0; i<this.map.length; i++) {
+        for(var j=0; j<this.map[i].length; j++) {
+            switch(this.map[i][j].type) {
+                case this.ITEM_TYPES.impassable.wall: ctx.fillStyle = '#000'; break;
+                case this.ITEM_TYPES.passable.way: ctx.fillStyle = '#fff'; break;
+                case this.ITEM_TYPES.passable.enter: ctx.fillStyle = 'green'; break;
+            }
+            ctx.fillRect(i * this.options.gridSize, j * this.options.gridSize, this.options.gridSize, this.options.gridSize);
+        }
+    }
+    /*
     var text = '';
     for(var i=0; i<this.options.width; i++) {
         for(var j=0; j<this.options.width; j++) {
-            text += this.map[i][j].enter + ' ';
+            text += this.map[i][j].type + ' ';
         }
         text += '<br>';
     }
     $('.screen').html(text);
+    */
 };
 
 Level.prototype.update = function (dt) {
 
 };
 
+
+/**
+ * Level generation
+ */
 Level.prototype.generate = function () {
     this.emptyLevel();
     this.generateEntryPoints();
     this.generateMap();
+    this.setMapSize();
 };
 
 Level.prototype.generateEntryPoints = function () {
     var countEntryPoints = parseInt(Math.random() * (this.options.maxEntryPoints - this.options.minEntryPoints) + this.options.minEntryPoints);
-    console.log(countEntryPoints);
     for(var i=0; i<countEntryPoints; i++) {
         var x = parseInt(Math.random() * this.options.width),
             y = parseInt(Math.random() * this.options.height);
@@ -173,4 +196,36 @@ Level.prototype.emptyLevel = function () {
             this.map[i].push({type: 0, enter: -1});
         }
     }
+};
+
+Level.prototype.setMapSize = function () {
+    this.options.mapWidth = this.options.width * this.options.gridSize;
+    this.options.mapHeight = this.options.height * this.options.gridSize;
+};
+
+/**
+ * Level manipulation
+ */
+
+Level.prototype.translate = function (x, y) {
+    var offsetX = x,
+        offsetY = y;
+    if(this.offset.x + x > 0) {
+        offsetX = x - (this.offset.x + x);
+    }
+    if(Math.abs(this.offset.x + x) + this.options.screenWidth > this.options.mapWidth) {
+        offsetX = this.options.screenWidth - this.options.mapWidth - this.offset.x;
+    }
+    if(this.offset.y + y > 0) {
+        offsetY = y - (this.offset.y + y);
+    }
+    if(Math.abs(this.offset.y + y) + this.options.screenHeight > this.options.mapHeight) {
+        offsetY = this.options.screenHeight - this.options.mapHeight - this.offset.y;
+    }
+
+    this.offset.x += offsetX;
+    this.offset.y += offsetY;
+
+    this.ctx.translate(offsetX, offsetY);
+    console.log(this.offset);
 };
