@@ -10,6 +10,7 @@
         this.level = null;
         this.paused = false;
         this.started = false;
+        this.keysDown = {};
 
         this.init();
     };
@@ -20,11 +21,21 @@
         fps: 30
     };
 
+    Game.prototype.keyCodes = {
+        w: 87,
+        a: 65,
+        s: 83,
+        d: 68,
+        p: 80
+    };
+
     Game.prototype.init = function () {
         this.applyOptions();
         this.renderMenu(true);
 
-        $(document).on('keypress', $.proxy(this.hotKeyBind, this));
+        $(document).on('keydown', $.proxy(this.addKeyDown, this));
+        $(document).on('keydown', $.proxy(this.hotKeyBind, this));
+        $(document).on('keyup', $.proxy(this.removeKeyDown, this));
         this.$elem.on('click', '[data-action]', $.proxy(this.action, this));
     };
 
@@ -84,12 +95,34 @@
     };
 
     Game.prototype.hotKeyBind = function(e, data) {
-        switch(e.keyCode) {
-            case 112: this.renderMenu(true); break;
-            case 97: this.level.translate(50, 0); break;
-            case 119: this.level.translate(0, 50); break;
-            case 100: this.level.translate(-50, 0); break;
-            case 115: this.level.translate(0, -50); break;
+        console.log(e);
+        var code = e.which;
+        if(this.keysDown[code] && code == this.keyCodes.p) {
+            this.renderMenu(true);
+        } else if(this.keysDown[code]) {
+            /** Move left up */
+            this.level.translate(50, 0);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move right up */
+            this.level.translate(0, 50);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move left down */
+            this.level.translate(-50, 0);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move right down */
+            this.level.translate(0, -50);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move left */
+            this.level.translate(50, 0);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move right */
+            this.level.translate(0, 50);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move up */
+            this.level.translate(-50, 0);
+        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            /** Move down */
+            this.level.translate(0, -50);
         }
     };
 
@@ -107,10 +140,12 @@
         $.each(this.timers, function () {
             clearInterval(this);
         });
-        this.paused = false;
-        delete(this.level);
+        if(this.level) {
+            this.ctx.clearRect(0, 0, this.level.options.mapWidth, this.level.options.mapHeight);
+            delete(this.level);
+        }
         this.ctx.restore();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.paused = true;
     };
 
     Game.prototype.start = function (e, data) {
@@ -166,6 +201,16 @@
                 screenWidth: this.options.screenWidth,
                 screenHeight: this.options.screenHeight
             });
+        }
+    };
+
+    Game.prototype.addKeyDown = function (e, data) {
+        this.keysDown[e.which] = true;
+    };
+
+    Game.prototype.removeKeyDown = function (e, data) {
+        if(this.keysDown[e.which]) {
+            delete(this.keysDown[e.which]);
         }
     };
 
