@@ -30,7 +30,7 @@ Level.prototype.draw = function() {
     var text = '';
     for(var i=0; i<this.options.width; i++) {
         for(var j=0; j<this.options.width; j++) {
-            text += this.map[i][j].type + ' ';
+            text += this.map[i][j].enter + ' ';
         }
         text += '<br>';
     }
@@ -49,7 +49,7 @@ Level.prototype.generate = function () {
 
 Level.prototype.generateEntryPoints = function () {
     var countEntryPoints = parseInt(Math.random() * (this.options.maxEntryPoints - this.options.minEntryPoints) + this.options.minEntryPoints);
-
+    console.log(countEntryPoints);
     for(var i=0; i<countEntryPoints; i++) {
         var x = parseInt(Math.random() * this.options.width),
             y = parseInt(Math.random() * this.options.height);
@@ -58,7 +58,11 @@ Level.prototype.generateEntryPoints = function () {
             branch: [{
                 x: x,
                 y: y
-            }]
+            }],
+            coords: {
+                x: x,
+                y: y
+            }
         });
         this.map[x][y] = {
             type: this.ITEM_TYPES.passable.enter,
@@ -108,17 +112,35 @@ Level.prototype.generateMap = function () {
 };
 
 Level.prototype.createBranch = function (x, y, enter) {
+    var isLinked = false;
     if(this.inAssoc(this.map[x][y].type, this.ITEM_TYPES.passable) !== -1) {
-        if(enter !== this.map[x][y].enter) {
-            this.enters[enter].linked = this.map[x][y].enter;
+        if(this.enters.length > 2) {
+            if (enter !== this.map[x][y].enter && this.enters[this.map[x][y].enter].linked !== enter) {
+                this.enters[enter].linked = this.map[x][y].enter;
+                isLinked = true;
+            } else if(enter === this.map[x][y].enter && this.enters[enter].branch.length > 1) {
+                isLinked = true;
+            }
+        } else {
+            if (enter !== this.map[x][y].enter) {
+                this.enters[enter].linked = this.map[x][y].enter;
+                isLinked = true;
+            } else if(enter === this.map[x][y].enter && this.enters[enter].branch.length > 1) {
+                isLinked = true;
+            }
         }
-    } else {
+    }
+    if(!isLinked) {
         var newBranch = parseInt(Math.random() * 100 +1);
-        if((newBranch > 0 && newBranch < 35)
-            || (newBranch > 70 && newBranch < 100)
+        if((newBranch > 0 && newBranch < 25)
+            || (newBranch > 80 && newBranch < 100)
             || (this.enters[enter].linked === false && this.enters[enter].branch.length < 2)) {
             this.enters[enter].branch.push({x: x, y: y, enter: enter});
-            this.map[x][y] = {type: this.ITEM_TYPES.passable.way, enter: enter};
+            if(this.map[x][y].type == this.ITEM_TYPES.passable.enter) {
+                this.map[x][y] = {type: this.map[x][y].type, enter: enter};
+            } else {
+                this.map[x][y] = {type: this.ITEM_TYPES.passable.way, enter: enter};
+            }
         }
     }
 };
