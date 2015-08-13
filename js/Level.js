@@ -32,6 +32,10 @@ Level.prototype.ITEM_TYPES = {
     }
 };
 
+Level.prototype.setOptions = function (options) {
+    this.options = $.extend({}, this.options, options);
+};
+
 Level.prototype.draw = function() {
     var ctx = this.ctx;
     for(var i=0; i<this.map.length; i++) {
@@ -45,15 +49,15 @@ Level.prototype.draw = function() {
         }
     }
     /*
-    var text = '';
-    for(var i=0; i<this.options.width; i++) {
-        for(var j=0; j<this.options.width; j++) {
-            text += this.map[i][j].type + ' ';
-        }
-        text += '<br>';
-    }
-    $('.screen').html(text);
-    */
+     var text = '';
+     for(var i=0; i<this.options.width; i++) {
+     for(var j=0; j<this.options.width; j++) {
+     text += this.map[i][j].type + ' ';
+     }
+     text += '<br>';
+     }
+     $('.screen').html(text);
+     */
 };
 
 Level.prototype.update = function (dt) {
@@ -227,5 +231,4 @@ Level.prototype.translate = function (x, y) {
     this.offset.y += offsetY;
 
     this.ctx.translate(offsetX, offsetY);
-    console.log(this.offset);
 };

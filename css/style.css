@@ -2,6 +2,9 @@ html, body, .container, .menu, .header, .container-fluid{
     margin: 0;
     padding: 0;
 }
+html, body{
+    overflow: hidden;
+}
 .wrapper{
     margin: 0;
     width: 100%;
@@ -27,6 +30,9 @@ html, body, .container, .menu, .header, .container-fluid{
 }
 .menu > .container > .container-fluid{
     overflow: auto;
+}
+.menu > .container > .container-fluid > div:last-child:hover{
+    background-color: darkred;
 }
 .menu-item{
     cursor: pointer;

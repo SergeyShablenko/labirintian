@@ -8,18 +8,22 @@
         this.options = $.extend({}, this.DEFAULT_OPTIONS, options);
         this.timers = {};
         this.level = null;
+        this.paused = false;
+        this.started = false;
 
         this.init();
     };
 
     Game.prototype.DEFAULT_OPTIONS = {
+        screenWidth: 1680,
+        screenHeight: 1024,
         fps: 30
     };
 
     Game.prototype.init = function () {
-        this.canvas.width = 1280;
-        this.canvas.height = 1024;
-        this.renderMenu();
+        this.applyOptions();
+        this.renderMenu(true);
+
         $(document).on('keypress', $.proxy(this.hotKeyBind, this));
         this.$elem.on('click', '[data-action]', $.proxy(this.action, this));
     };
@@ -54,24 +58,34 @@
         return this[action](e);
     };
 
-    Game.prototype.renderMenu = function () {
+    Game.prototype.renderMenu = function (toggle) {
         var menu = this.$elem.find('.menu');
-        if(menu.hasClass('menu-shown')) {
-            $(document.body).css('overflow', 'auto');
+        if(menu.hasClass('menu-shown') && toggle) {
             menu.removeClass('menu-shown');
             menu.fadeOut('slow');
         } else {
-            $(document.body).css('overflow', 'hidden');
             menu.css('left', 0);
             menu.css('top', $(document.body).scrollTop());
             menu.addClass('menu-shown');
             menu.fadeIn('slow');
+            var $elem = menu.find('.container-fluid > div:first-child');
+
+            if(!this.started) {
+                $elem.data('action', 'start');
+                $elem.html('Start');
+            } else if(this.paused) {
+                $elem.data('action', 'unpause');
+                $elem.html('Resume');
+            } else {
+                $elem.data('action', 'pause');
+                $elem.html('Pause');
+            }
         }
     };
 
     Game.prototype.hotKeyBind = function(e, data) {
         switch(e.keyCode) {
-            case 112: this.renderMenu(); break;
+            case 112: this.renderMenu(true); break;
             case 97: this.level.translate(50, 0); break;
             case 119: this.level.translate(0, 50); break;
             case 100: this.level.translate(-50, 0); break;
@@ -80,12 +94,79 @@
     };
 
     Game.prototype.lvlGenerate = function () {
-        this.level = new Level(this.ctx, {});
-    //    this.level.draw();
-        if(typeof this.timers.mainProc !== 'undefined') {
-            clearInterval(this.timers.mainProc);
+        this.level = new Level(this.ctx, {
+            screenWidth: this.options.screenWidth,
+            screenHeight: this.options.screenHeight
+        });
+
+        this.stopDrawing();
+        this.startDrawing();
+    };
+
+    Game.prototype.clear = function () {
+        $.each(this.timers, function () {
+            clearInterval(this);
+        });
+        this.paused = false;
+        delete(this.level);
+        this.ctx.restore();
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    };
+
+    Game.prototype.start = function (e, data) {
+        this.clear();
+
+        this.canvas.width = this.options.screenWidth;
+        this.canvas.height = this.options.screenHeight;
+        this.started = true;
+
+        this.lvlGenerate();
+        this.renderMenu(true);
+    };
+
+    Game.prototype.pause = function (e, data) {
+        this.setPause();
+        this.renderMenu();
+    };
+
+    Game.prototype.unpause = function (e, data) {
+        this.unsetPause();
+        this.renderMenu();
+    };
+
+    Game.prototype.endGame = function () {
+        this.started = false;
+        this.clear();
+        this.renderMenu();
+    };
+
+    Game.prototype.setPause = function () {
+        this.paused = true;
+        this.stopDrawing();
+    };
+
+    Game.prototype.unsetPause = function () {
+        this.paused = false;
+        this.startDrawing();
+    };
+
+    Game.prototype.startDrawing = function () {
+        this.timers.drawProc = setInterval($.proxy(this.level.draw, this.level), 1000 / this.options.fps);
+    };
+
+    Game.prototype.stopDrawing = function () {
+        clearInterval(this.timers.drawProc);
+    };
+
+    Game.prototype.applyOptions = function () {
+        this.canvas.width = this.options.screenWidth;
+        this.canvas.height = this.options.screenHeight;
+        if(this.level) {
+            this.level.setOptions({
+                screenWidth: this.options.screenWidth,
+                screenHeight: this.options.screenHeight
+            });
         }
-        this.timers.mainProc = setInterval($.proxy(this.level.draw, this.level), 1000 / this.options.fps);
     };
 
     function Plugin(option) {
