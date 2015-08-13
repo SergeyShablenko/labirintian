@@ -95,32 +95,31 @@
     };
 
     Game.prototype.hotKeyBind = function(e, data) {
-        console.log(e);
         var code = e.which;
         if(this.keysDown[code] && code == this.keyCodes.p) {
             this.renderMenu(true);
-        } else if(this.keysDown[code]) {
+        } else if(this.keyCodes.a in this.keysDown && this.keyCodes.w in this.keysDown) {
             /** Move left up */
-            this.level.translate(50, 0);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            this.level.translate(50, 50);
+        } else if(this.keyCodes.d in this.keysDown && this.keyCodes.w in this.keysDown) {
             /** Move right up */
-            this.level.translate(0, 50);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            this.level.translate(-50, 50);
+        } else if(this.keyCodes.a in this.keysDown && this.keyCodes.s in this.keysDown) {
             /** Move left down */
-            this.level.translate(-50, 0);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            this.level.translate(50, -50);
+        } else if(this.keyCodes.d in this.keysDown && this.keyCodes.s in this.keysDown) {
             /** Move right down */
-            this.level.translate(0, -50);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
+            this.level.translate(-50, -50);
+        } else if(this.keysDown[code] && code == this.keyCodes.a) {
             /** Move left */
             this.level.translate(50, 0);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
+        } else if(this.keysDown[code] && code == this.keyCodes.d) {
             /** Move right */
-            this.level.translate(0, 50);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
-            /** Move up */
             this.level.translate(-50, 0);
-        } else if(this.keysDown[code] && code == this.keyCodes.) {
+        } else if(this.keysDown[code] && code == this.keyCodes.w) {
+            /** Move up */
+            this.level.translate(0, 50);
+        } else if(this.keysDown[code] && code == this.keyCodes.s) {
             /** Move down */
             this.level.translate(0, -50);
         }
