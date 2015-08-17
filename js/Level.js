@@ -1,7 +1,6 @@
 var Level = function (context, options) {
     this.ctx = context;
     this.options = $.extend({}, this.DEFAULT_OPTIONS, options);
-    this.time = 0;
     this.map = [];
     this.enters = [];
     this.offset = {x: 0, y: 0};
@@ -15,11 +14,11 @@ Level.prototype.DEFAULT_OPTIONS = {
     screenHeight: 1024,
     mapWidth: 0,
     mapHeight: 0,
-    width: 200,
-    height: 200,
+    width: 50,
+    height: 50,
     maxEntryPoints: 10,
     minEntryPoints: 2,
-    gridSize: 20
+    gridSize: 50
 };
 
 Level.prototype.ITEM_TYPES = {
@@ -37,9 +36,22 @@ Level.prototype.setOptions = function (options) {
 };
 
 Level.prototype.draw = function() {
-    var ctx = this.ctx;
-    for(var i=0; i<this.map.length; i++) {
-        for(var j=0; j<this.map[i].length; j++) {
+    var ctx = this.ctx,
+        xStart = Math.abs(parseInt(this.offset.x / this.options.gridSize)),
+        xStop = xStart + parseInt(this.options.screenWidth / this.options.gridSize),
+        yStart = Math.abs(parseInt(this.offset.y / this.options.gridSize)),
+        yStop = yStart + parseInt(this.options.screenHeight / this.options.gridSize);
+
+    for(var i=xStart; i<=xStop; i++) {
+        if(!this.map[i]) {
+            break;
+        }
+
+        for(var j=yStart; j<=yStop; j++) {
+            if(!this.map[i][j]) {
+                break;
+            }
+
             switch(this.map[i][j].type) {
                 case this.ITEM_TYPES.impassable.wall: ctx.fillStyle = '#000'; break;
                 case this.ITEM_TYPES.passable.way: ctx.fillStyle = '#fff'; break;
@@ -48,16 +60,6 @@ Level.prototype.draw = function() {
             ctx.fillRect(i * this.options.gridSize, j * this.options.gridSize, this.options.gridSize, this.options.gridSize);
         }
     }
-    /*
-     var text = '';
-     for(var i=0; i<this.options.width; i++) {
-     for(var j=0; j<this.options.width; j++) {
-     text += this.map[i][j].type + ' ';
-     }
-     text += '<br>';
-     }
-     $('.screen').html(text);
-     */
 };
 
 Level.prototype.update = function (dt) {
@@ -218,13 +220,13 @@ Level.prototype.translate = function (x, y) {
         offsetX = x - (this.offset.x + x);
     }
     if(Math.abs(this.offset.x + x) + this.options.screenWidth > this.options.mapWidth) {
-        offsetX = this.options.screenWidth - this.options.mapWidth - this.offset.x;
+        offsetX = -this.offset.x - (this.options.mapWidth - this.options.screenWidth);
     }
     if(this.offset.y + y > 0) {
         offsetY = y - (this.offset.y + y);
     }
     if(Math.abs(this.offset.y + y) + this.options.screenHeight > this.options.mapHeight) {
-        offsetY = this.options.screenHeight - this.options.mapHeight - this.offset.y;
+        offsetY = -this.offset.y - (this.options.mapHeight - this.options.screenHeight);
     }
 
     this.offset.x += offsetX;
