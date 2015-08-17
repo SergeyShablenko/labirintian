@@ -35,10 +35,16 @@
 
 <script id="options" type="text/x-tmpl">
     <div class="options">
-        <div class="header"></div>
         <ul class="row">
-            <li></li>
-            <li></li>
+            <li>Resolution</li>
+            <li><input type="number" min="800" value="800" data-option="screenWidth"></li>X
+            <li><input type="number" min="600" value="800" data-option="screenHeight"></li>
+            <li><input type="checkbox" data-option="resolutionAuto"> Full screen</li>
         </ul>
+        <ul class="row">
+            <li>FPS</li>
+            <li><input type="number" min="1" value="30" data-option="fps"></li>
+        </ul>
+        <div class="btn" data-action="apply-options"></div>
     </div>
 </script>
