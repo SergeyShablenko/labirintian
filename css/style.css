@@ -66,3 +66,6 @@ html, body{
 .screen canvas{
     margin: auto;
 }
+.menu-content-container{
+    position: absolute;
+}

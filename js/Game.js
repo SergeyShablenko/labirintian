@@ -20,7 +20,8 @@
         screenWidth: 1680,
         screenHeight: 1024,
         fps: 30,
-        menuShown: 'menu-shown'
+        menuShown: 'menu-shown',
+        menuContent: 'menu-content-container'
     };
 
     Game.prototype.keyCodes = {
@@ -213,6 +214,21 @@
                 screenHeight: window.innerHeight//this.options.screenHeight
             });
         }
+    };
+
+    Game.prototype.renderOptions = function (e, data) {
+        var template = $(e.currentTarget).data('template');
+        this.renderMenuContent('#' + template);
+    };
+
+    Game.prototype.renderMenuContent = function (template) {
+        var container = this.$elem.find('.' + this.options.menuContent);
+        if(typeof template === 'undefined') {
+            container.empty();
+            return;
+        }
+
+        $(template).tmpl().appendTo(container);
     };
 
     Game.prototype.addKeyDown = function (e, data) {
