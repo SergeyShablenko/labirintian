@@ -20,7 +20,7 @@
         screenWidth: 1680,
         screenHeight: 1024,
         fps: 30,
-        autoResolution: true,
+        autoResolution: false,
         menuShown: 'menu-shown',
         menuContent: 'menu-content-container',
         fadeDuration: 500
@@ -32,6 +32,10 @@
         s: 83,
         d: 68,
         p: 80
+    };
+
+    Game.prototype.DEFAULT_TEMPLATES = {
+        options: 'options'
     };
 
     Game.prototype.init = function () {
@@ -211,26 +215,57 @@
     };
 
     Game.prototype.applyOptions = function () {
-        this.canvas.width = window.innerWidth;//this.options.screenWidth;
-        this.canvas.height = window.innerHeight;//this.options.screenHeight;
+        this.canvas.width = this.options.screenWidth;
+        this.canvas.height = this.options.screenHeight;
+
         if(this.level) {
             this.level.setOptions({
-                screenWidth: window.innerWidth,//this.options.screenWidth,
-                screenHeight: window.innerHeight//this.options.screenHeight
+                screenWidth: parseInt(this.options.screenWidth),
+                screenHeight: parseInt(this.options.screenHeight)
             });
         }
     };
 
-    Game.prototype.renderOptions = function (e, data) {
-        var template = $(e.currentTarget).data('template'),
-            data = {
-                defaultWidth: this.options.screenWidth,
-                defaultHeight: this.options.screenHeight,
-                defaultFps: this.options.fps,
-                autoResolution: this.options.autoResolution
-            };
+    Game.prototype.setOptions = function () {
+        var optionsBtn = this.$elem.find('[data-action="render-options"]'),
+            options = this.$elem.find('[data-option]'),
+            self = this;
 
-        this.renderMenuContent(e.currentTarget, template, data);
+        options.each(function () {
+            var option = $(this).data('option'),
+                value = $(this).val();
+
+            if(self.options.hasOwnProperty(option)) {
+                if($(this).is(':checkbox')) {
+                    self.options[option] = $(this).is(':checked');
+                } else if(typeof self.options[option] == 'number') {
+                    self.options[option] = parseInt(value);
+                } else if(typeof self.options[option] == 'string') {
+                    self.options[option] = value;
+                }
+            }
+        });
+
+        if(this.options.autoResolution) {
+            this.options.screenHeight = window.innerHeight;
+            this.options.screenWidth = window.innerWidth;
+        }
+
+        this.applyOptions();
+        optionsBtn.removeClass('active');
+        this.renderMenuContent(optionsBtn, this.DEFAULT_TEMPLATES.options, this.options);
+    };
+
+    Game.prototype.resetDefaultOptions = function () {
+        var optionsBtn = this.$elem.find('[data-action="render-options"]');
+        this.options = $.extend({}, this.DEFAULT_OPTIONS);
+        optionsBtn.removeClass('active');
+        this.renderMenuContent(optionsBtn, this.DEFAULT_TEMPLATES.options, this.options);
+    };
+
+    Game.prototype.renderOptions = function (e, data) {
+        var template = $(e.currentTarget).data('template');
+        this.renderMenuContent(e.currentTarget, template, this.options);
     };
 
     Game.prototype.renderMenuContent = function (elem, template, data) {

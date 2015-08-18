@@ -36,21 +36,24 @@
 
 <script id="options" type="text/x-tmpl">
     <div class="options">
-        <ul class="row">
-            <li>Resolution</li>
-            <li><input type="number" min="800" value="{%=o.defaultWidth%}" data-option="screenWidth" title="Window width"></li>
-            <li>X</li>
-            <li><input type="number" min="600" value="{%=o.defaultHeight%}" data-option="screenHeight" title="Window height"></li>
-            <li><input type="checkbox" data-option="resolutionAuto"
-            {% if(o.autoResolution == true) { %}
-                checked
-            {% } %}
-            > Full screen</li>
-        </ul>
-        <ul class="row">
-            <li>FPS</li>
-            <li><input type="number" min="1" value="{%=o.defaultFps%}" data-option="fps" title="Frames per second"></li>
-        </ul>
-        <div class="btn submit" data-action="apply-options">Apply</div>
+        <div class="group">
+            <ul class="row">
+                <li>Resolution</li>
+                <li><input type="number" min="800" value="{%=o.screenWidth%}" data-option="screenWidth" title="Window width"></li>
+                <li>X</li>
+                <li><input type="number" min="600" value="{%=o.screenHeight%}" data-option="screenHeight" title="Window height"></li>
+                <li><input type="checkbox" data-option="autoResolution"
+                {% if(o.autoResolution == true) { %}
+                    checked
+                {% } %}
+                > Full screen</li>
+            </ul>
+            <ul class="row">
+                <li>FPS</li>
+                <li><input type="number" min="1" value="{%=o.fps%}" data-option="fps" title="Frames per second"></li>
+            </ul>
+        </div>
+        <div class="btn submit-btn pull-right" data-action="set-options">Apply</div>
+        <div class="btn default-btn pull-right" data-action="reset-default-options">Reset default</div>
     </div>
 </script>

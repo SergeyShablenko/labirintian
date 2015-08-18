@@ -123,7 +123,7 @@ input[type="number"]{
     font-size: 18px;
     font-weight: bold;
     min-width: 75px;
-    float: right;
+    margin: 5px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -136,7 +136,21 @@ input[type="number"]{
 }
 .btn:hover{
     cursor: pointer;
-    background-color: seagreen;
     color: white;
     box-shadow: 1px 1px 3px 1px lightgray;
+}
+.default-btn:hover{
+    background-color: cornflowerblue;
+}
+.submit-btn:hover{
+    background-color: seagreen;
+}
+.pull-right{
+    float: right;
+}
+.group{
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
 }

@@ -33,6 +33,9 @@ Level.prototype.ITEM_TYPES = {
 
 Level.prototype.setOptions = function (options) {
     this.options = $.extend({}, this.options, options);
+    this.ctx.restore();
+    this.offset.x = 0;
+    this.offset.y = 0;
 };
 
 Level.prototype.draw = function() {
