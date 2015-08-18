@@ -5,6 +5,11 @@ html, body, .container, .menu, .header, .container-fluid{
 html, body{
     overflow: hidden;
 }
+ul,li,ol{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
 .wrapper{
     margin: 0;
     width: 100%;
@@ -19,6 +24,7 @@ html, body{
 
 }
 .menu > .container{
+    float: left;
     border-right: 1px solid black;
     background-color: white;
     -webkit-box-shadow: 1px 1px 10px 1px black;
@@ -26,6 +32,10 @@ html, body{
     box-shadow: 1px 1px 10px 1px black;
     width: 225px;
     height: 100%;
+    -webkit-transition: all ease-out 0.5s;
+    -moz-transition: all ease-out 0.5s;
+    -ms-transition: all ease-out 0.5s;
+    -o-transition: all ease-out 0.5s;
     transition: all ease-out 0.5s;
 }
 .menu > .container > .container-fluid{
@@ -66,6 +76,67 @@ html, body{
 .screen canvas{
     margin: auto;
 }
-.menu-content-container{
-    position: absolute;
+.container + .menu-content-container{
+    display: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    border: none;
+    min-width: 768px;
+    -webkit-transition: none;
+    -moz-transition: none;
+    -ms-transition: none;
+    -o-transition: none;
+    transition: none;
+}
+.container + .menu-content-container > div {
+    margin: 20px;
+}
+ul.row{
+    display: inline-block;
+    width: 100%;
+}
+ul.row > * {
+    float: left;
+    margin: 5px;
+}
+.active{
+    border-right: 5px solid forestgreen;
+    -webkit-box-shadow: inset 0 0 3px 0 lightgray;
+    -moz-box-shadow: inset 0 0 3px 0 lightgray;
+    box-shadow: inset 0 0 3px 0 lightgray;
+}
+input[type="number"]{
+    min-width: 25px;
+    max-width: 125px;
+}
+.btn{
+    display: inline-block;
+    background-color: white;
+    border: 1px solid black;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    text-align: center;
+    padding: 10px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 75px;
+    float: right;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-transition: all ease-out 0.5s;
+    -moz-transition: all ease-out 0.5s;
+    -ms-transition: all ease-out 0.5s;
+    -o-transition: all ease-out 0.5s;
+    transition: all ease-out 0.5s;
+}
+.btn:hover{
+    cursor: pointer;
+    background-color: seagreen;
+    color: white;
+    box-shadow: 1px 1px 3px 1px lightgray;
 }

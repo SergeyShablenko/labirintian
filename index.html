@@ -4,7 +4,7 @@
     <title>Labirintian</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/jquery-2.1.4.min.js"></script>
-    <script src="js/jquery.tmpl.min.js"></script>
+    <script src="js/tmpl.min.js"></script>
     <script src="js/Game.js"></script>
     <script src="js/Level.js"></script>
 
@@ -38,14 +38,19 @@
     <div class="options">
         <ul class="row">
             <li>Resolution</li>
-            <li><input type="number" min="800" value="800" data-option="screenWidth"></li>X
-            <li><input type="number" min="600" value="800" data-option="screenHeight"></li>
-            <li><input type="checkbox" data-option="resolutionAuto"> Full screen</li>
+            <li><input type="number" min="800" value="{%=o.defaultWidth%}" data-option="screenWidth" title="Window width"></li>
+            <li>X</li>
+            <li><input type="number" min="600" value="{%=o.defaultHeight%}" data-option="screenHeight" title="Window height"></li>
+            <li><input type="checkbox" data-option="resolutionAuto"
+            {% if(o.autoResolution == true) { %}
+                checked
+            {% } %}
+            > Full screen</li>
         </ul>
         <ul class="row">
             <li>FPS</li>
-            <li><input type="number" min="1" value="30" data-option="fps"></li>
+            <li><input type="number" min="1" value="{%=o.defaultFps%}" data-option="fps" title="Frames per second"></li>
         </ul>
-        <div class="btn" data-action="apply-options"></div>
+        <div class="btn submit" data-action="apply-options">Apply</div>
     </div>
 </script>

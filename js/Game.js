@@ -1,4 +1,4 @@
-+function($) {
++function($, tmpl) {
     'use strict';
 
     var Game = function (elem, options) {
@@ -20,8 +20,10 @@
         screenWidth: 1680,
         screenHeight: 1024,
         fps: 30,
+        autoResolution: true,
         menuShown: 'menu-shown',
-        menuContent: 'menu-content-container'
+        menuContent: 'menu-content-container',
+        fadeDuration: 500
     };
 
     Game.prototype.keyCodes = {
@@ -82,7 +84,6 @@
             menu.addClass(this.options.menuShown);
             menu.fadeIn('slow');
             var $elem = menu.find('.container-fluid > div:first-child');
-
             if(!this.started) {
                 $elem.data('action', 'start');
                 $elem.html('Start');
@@ -169,22 +170,26 @@
         this.lvlGenerate();
         this.applyOptions();
         this.renderMenu(true);
+        this.renderMenuContent();
     };
 
     Game.prototype.pause = function (e, data) {
         this.setPause();
         this.renderMenu();
+        this.renderMenuContent();
     };
 
     Game.prototype.unpause = function (e, data) {
         this.unsetPause();
         this.renderMenu(true);
+        this.renderMenuContent();
     };
 
-    Game.prototype.endGame = function () {
+    Game.prototype.endGame = function (e, data) {
         this.started = false;
         this.clear();
         this.renderMenu();
+        this.renderMenuContent();
     };
 
     Game.prototype.setPause = function () {
@@ -217,18 +222,37 @@
     };
 
     Game.prototype.renderOptions = function (e, data) {
-        var template = $(e.currentTarget).data('template');
-        this.renderMenuContent('#' + template);
+        var template = $(e.currentTarget).data('template'),
+            data = {
+                defaultWidth: this.options.screenWidth,
+                defaultHeight: this.options.screenHeight,
+                defaultFps: this.options.fps,
+                autoResolution: this.options.autoResolution
+            };
+
+        this.renderMenuContent(e.currentTarget, template, data);
     };
 
-    Game.prototype.renderMenuContent = function (template) {
+    Game.prototype.renderMenuContent = function (elem, template, data) {
         var container = this.$elem.find('.' + this.options.menuContent);
         if(typeof template === 'undefined') {
             container.empty();
+            container.fadeOut(this.options.fadeDuration);
+            this.menu.find('.active').removeClass('active');
             return;
         }
 
-        $(template).tmpl().appendTo(container);
+        if($(elem).hasClass('active')) {
+            container.empty();
+            container.fadeOut(this.options.fadeDuration);
+            $(elem).removeClass('active');
+            return;
+        }
+
+        container.empty();
+        container.append(tmpl(template, data));
+        $(elem).addClass('active');
+        container.fadeIn(this.options.fadeDuration);
     };
 
     Game.prototype.addKeyDown = function (e, data) {
@@ -263,4 +287,4 @@
         $.fn.Game = old;
         return this;
     };
-}(jQuery);
+}(jQuery, tmpl);
