@@ -145,7 +145,7 @@ Level.prototype.generateMap = function () {
 
 Level.prototype.createBranch = function (x, y, enter) {
     var isLinked = false;
-    if(this.inAssoc(this.map[x][y].type, this.ITEM_TYPES.passable) !== -1) {
+    if($.inAssoc(this.map[x][y].type, this.ITEM_TYPES.passable) !== -1) {
         if(this.enters.length > 2) {
             if (enter !== this.map[x][y].enter && this.enters[this.map[x][y].enter].linked !== enter) {
                 this.enters[enter].linked = this.map[x][y].enter;
@@ -185,16 +185,6 @@ Level.prototype.checkLink = function () {
     }
 
     return true;
-};
-
-Level.prototype.inAssoc = function (value, array) {
-    for(var i in array) {
-        if(array[i] === value) {
-            return i;
-        }
-    }
-
-    return -1;
 };
 
 Level.prototype.emptyLevel = function () {
