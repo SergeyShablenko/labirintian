@@ -2,8 +2,14 @@ var Level = function (context, options) {
     this.ctx = context;
     this.options = $.extend({}, this.DEFAULT_OPTIONS, options);
     this.map = [];
-    this.enters = [];
+    //this.enters = [];
+    this.enteryPoints = [];
     this.offset = {x: 0, y: 0};
+
+    this.groundTemplate = {
+        type: this.ITEM_TYPES.wall,
+        passable: false
+    };
 
     this.generate();
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -16,19 +22,24 @@ Level.prototype.DEFAULT_OPTIONS = {
     mapHeight: 0,
     width: 50,
     height: 50,
-    maxEntryPoints: 10,
+    maxEntryPoints: 3,
     minEntryPoints: 2,
     gridSize: 50
 };
 
 Level.prototype.ITEM_TYPES = {
-    passable: {
-        way: 1,
-        enter: 2
-    },
-    impassable: {
-        wall: 0
-    }
+    /*
+     passable: {
+     way: 1,
+     enter: 2
+     },
+     impassable: {
+     wall: 0
+     }
+     */
+    wall: 0,
+    way: 1,
+    enter: 2
 };
 
 Level.prototype.setOptions = function (options) {
@@ -56,9 +67,9 @@ Level.prototype.draw = function() {
             }
 
             switch(this.map[i][j].type) {
-                case this.ITEM_TYPES.impassable.wall: ctx.fillStyle = '#000'; break;
-                case this.ITEM_TYPES.passable.way: ctx.fillStyle = '#fff'; break;
-                case this.ITEM_TYPES.passable.enter: ctx.fillStyle = 'green'; break;
+                case this.ITEM_TYPES.wall: ctx.fillStyle = '#000'; break;
+                case this.ITEM_TYPES.way: ctx.fillStyle = '#fff'; break;
+                case this.ITEM_TYPES.enter: ctx.fillStyle = 'green'; break;
             }
             ctx.fillRect(i * this.options.gridSize, j * this.options.gridSize, this.options.gridSize, this.options.gridSize);
         }
@@ -69,124 +80,157 @@ Level.prototype.update = function (dt) {
 
 };
 
-
 /**
  * Level generation
  */
 Level.prototype.generate = function () {
     this.emptyLevel();
     this.generateEntryPoints();
-    this.generateMap();
     this.setMapSize();
 };
 
 Level.prototype.generateEntryPoints = function () {
-    var countEntryPoints = parseInt(Math.random() * (this.options.maxEntryPoints - this.options.minEntryPoints) + this.options.minEntryPoints);
-    for(var i=0; i<countEntryPoints; i++) {
-        var x = parseInt(Math.random() * this.options.width),
-            y = parseInt(Math.random() * this.options.height);
-        this.enters.push({
-            linked: false,
-            branch: [{
-                x: x,
-                y: y
-            }],
-            coords: {
-                x: x,
-                y: y
-            }
+    var entryPointsCnt = Math.random() * (this.options.maxEntryPoints - this.options.minEntryPoints) + this.options.minEntryPoints;
+    for(var i=0; i<entryPointsCnt; i++) {
+        var x = parseInt(Math.random() * (this.options.width - 1) + 1),
+            y = parseInt(Math.random() * (this.options.height - 1) + 1);
+
+        while(this.map[x][y].type === this.ITEM_TYPES.enter) {
+            x = parseInt(Math.random() * (this.options.width - 1) + 1);
+            y = parseInt(Math.random() * (this.options.height - 1) + 1);
+        }
+
+        this.enteryPoints.push({
+            x: x,
+            y: y,
+            number: i
         });
-        this.map[x][y] = {
-            type: this.ITEM_TYPES.passable.enter,
-            enter: i
-        };
+
+        this.map[x][y] = $.extend({}, this.groundTemplate, {
+            type: this.ITEM_TYPES.enter,
+            passable: true
+        });
     }
 };
 
-Level.prototype.generateMap = function () {
-    while(true) {
-        for(var i=0; i<this.enters.length; i++) {
-            for(var j=0; j< this.enters[i].branch.length; j++) {
-                var x = this.enters[i].branch[j].x,
-                    y = this.enters[i].branch[j].y;
-
-                if(typeof this.map[x+1] !== 'undefined') {
-                    this.createBranch(x+1, y, i);
-                }
-                if(typeof this.map[x][y+1] !== 'undefined') {
-                    this.createBranch(x, y+1, i);
-                }
-                if(typeof this.map[x+1] !== 'undefined') {
-                    if(typeof this.map[x+1][y+1] !== 'undefined') {
-                        this.createBranch(x+1, y+1, i);
-                    }
-                }
-                if(typeof this.map[x-1] !== 'undefined') {
-                    this.createBranch(x-1, y, i);
-                }
-                if(typeof this.map[x][y-1] !== 'undefined') {
-                    this.createBranch(x, y-1, i);
-                }
-                if(typeof this.map[x-1] !== 'undefined') {
-                    if(typeof this.map[x-1][y-1] !== 'undefined') {
-                        this.createBranch(x-1, y-1, i);
-                    }
-                }
-
-                this.enters[i].branch.splice(j, 1);
-            }
-        }
-
-        if(this.checkLink()) {
-            break;
-        }
-    }
+Level.prototype.linkEntryPoints = function () {
+    
 };
+/*
+ Level.prototype.generate = function () {
+ this.emptyLevel();
+ this.generateEntryPoints();
+ this.generateMap();
+ this.setMapSize();
+ };
 
-Level.prototype.createBranch = function (x, y, enter) {
-    var isLinked = false;
-    if($.inAssoc(this.map[x][y].type, this.ITEM_TYPES.passable) !== -1) {
-        if(this.enters.length > 2) {
-            if (enter !== this.map[x][y].enter && this.enters[this.map[x][y].enter].linked !== enter) {
-                this.enters[enter].linked = this.map[x][y].enter;
-                isLinked = true;
-            } else if(enter === this.map[x][y].enter && this.enters[enter].branch.length > 1) {
-                isLinked = true;
-            }
-        } else {
-            if (enter !== this.map[x][y].enter) {
-                this.enters[enter].linked = this.map[x][y].enter;
-                isLinked = true;
-            } else if(enter === this.map[x][y].enter && this.enters[enter].branch.length > 1) {
-                isLinked = true;
-            }
-        }
-    }
-    if(!isLinked) {
-        var newBranch = parseInt(Math.random() * 100 +1);
-        if((newBranch > 0 && newBranch < 25)
-            || (newBranch > 80 && newBranch < 100)
-            || (this.enters[enter].linked === false && this.enters[enter].branch.length < 2)) {
-            this.enters[enter].branch.push({x: x, y: y, enter: enter});
-            if(this.map[x][y].type == this.ITEM_TYPES.passable.enter) {
-                this.map[x][y] = {type: this.map[x][y].type, enter: enter};
-            } else {
-                this.map[x][y] = {type: this.ITEM_TYPES.passable.way, enter: enter};
-            }
-        }
-    }
-};
+ Level.prototype.generateEntryPoints = function () {
+ var countEntryPoints = parseInt(Math.random() * (this.options.maxEntryPoints - this.options.minEntryPoints) + this.options.minEntryPoints);
+ for(var i=0; i<countEntryPoints; i++) {
+ var x = parseInt(Math.random() * this.options.width),
+ y = parseInt(Math.random() * this.options.height);
+ this.enters.push({
+ linked: false,
+ branch: [{
+ x: x,
+ y: y
+ }],
+ coords: {
+ x: x,
+ y: y
+ }
+ });
+ this.map[x][y] = {
+ type: this.ITEM_TYPES.passable.enter,
+ enter: i
+ };
+ }
+ };
 
-Level.prototype.checkLink = function () {
-    for(var i=0; i<this.enters.length; i++) {
-        if(this.enters[i].linked === false) {
-            return false;
-        }
-    }
+ Level.prototype.generateMap = function () {
+ while(true) {
+ for(var i=0; i<this.enters.length; i++) {
+ for(var j=0; j< this.enters[i].branch.length; j++) {
+ var x = this.enters[i].branch[j].x,
+ y = this.enters[i].branch[j].y;
 
-    return true;
-};
+ if(typeof this.map[x+1] !== 'undefined') {
+ this.createBranch(x+1, y, i);
+ }
+ if(typeof this.map[x][y+1] !== 'undefined') {
+ this.createBranch(x, y+1, i);
+ }
+ if(typeof this.map[x+1] !== 'undefined') {
+ if(typeof this.map[x+1][y+1] !== 'undefined') {
+ this.createBranch(x+1, y+1, i);
+ }
+ }
+ if(typeof this.map[x-1] !== 'undefined') {
+ this.createBranch(x-1, y, i);
+ }
+ if(typeof this.map[x][y-1] !== 'undefined') {
+ this.createBranch(x, y-1, i);
+ }
+ if(typeof this.map[x-1] !== 'undefined') {
+ if(typeof this.map[x-1][y-1] !== 'undefined') {
+ this.createBranch(x-1, y-1, i);
+ }
+ }
 
+ this.enters[i].branch.splice(j, 1);
+ }
+ }
+
+ if(this.checkLink()) {
+ break;
+ }
+ }
+ };
+
+ Level.prototype.createBranch = function (x, y, enter) {
+ var isLinked = false;
+ if($.inAssoc(this.map[x][y].type, this.ITEM_TYPES.passable) !== -1) {
+ if(this.enters.length > 2) {
+ if (enter !== this.map[x][y].enter && this.enters[this.map[x][y].enter].linked !== enter) {
+ this.enters[enter].linked = this.map[x][y].enter;
+ isLinked = true;
+ } else if(enter === this.map[x][y].enter && this.enters[enter].branch.length > 1) {
+ isLinked = true;
+ }
+ } else {
+ if (enter !== this.map[x][y].enter) {
+ this.enters[enter].linked = this.map[x][y].enter;
+ isLinked = true;
+ } else if(enter === this.map[x][y].enter && this.enters[enter].branch.length > 1) {
+ isLinked = true;
+ }
+ }
+ }
+ if(!isLinked) {
+ var newBranch = parseInt(Math.random() * 100 +1);
+ if((newBranch > 0 && newBranch < 25)
+ || (newBranch > 80 && newBranch < 100)
+ || (this.enters[enter].linked === false && this.enters[enter].branch.length < 2)) {
+ this.enters[enter].branch.push({x: x, y: y, enter: enter});
+ if(this.map[x][y].type == this.ITEM_TYPES.passable.enter) {
+ this.map[x][y] = {type: this.map[x][y].type, enter: enter};
+ } else {
+ this.map[x][y] = {type: this.ITEM_TYPES.passable.way, enter: enter};
+ }
+ }
+ }
+ };
+
+ Level.prototype.checkLink = function () {
+ for(var i=0; i<this.enters.length; i++) {
+ if(this.enters[i].linked === false) {
+ return false;
+ }
+ }
+
+ return true;
+ };
+ */
 Level.prototype.emptyLevel = function () {
     this.map = [];
     for(var i=0; i<this.options.width; i++) {
